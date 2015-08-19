@@ -5,9 +5,6 @@
 
 #define CALL_STREAM_DES_BUFFER_LEVEL_KEY @"CallStreamDesiredBufferLevel"
 
-#define PHONE_DIRECTORY_BLOOM_FILTER_HASH_COUNT_KEY @"Directory Bloom Hash Count"
-#define PHONE_DIRECTORY_EXPIRATION @"Directory Expiration"
-
 #define DEFAULT_CALL_STREAM_DES_BUFFER_LEVEL 0.5
 
 #define SETTINGS_EXPANDED_ROW_PREF_DICT_KEY @"Settings Expanded Row Pref Dict Key"
@@ -30,30 +27,6 @@
 #define BloomFilterCacheName     @"bloomfilter"
 
 @implementation PropertyListPreferences (PropertyUtil)
-
--(PhoneNumberDirectoryFilter*) tryGetSavedPhoneNumberDirectory {
-    NSUInteger hashCount = [[self tryGetValueForKey:PHONE_DIRECTORY_BLOOM_FILTER_HASH_COUNT_KEY] unsignedIntegerValue];
-    NSData* data = [self tryRetreiveBloomFilter];
-    NSDate* expiration = [self tryGetValueForKey:PHONE_DIRECTORY_EXPIRATION];
-    if (hashCount == 0 || data.length == 0 || expiration == nil) return nil;
-    BloomFilter* bloomFilter = [BloomFilter bloomFilterWithHashCount:hashCount andData:data];
-    return [PhoneNumberDirectoryFilter phoneNumberDirectoryFilterWithBloomFilter:bloomFilter
-                                                               andExpirationDate:expiration];
-}
--(void) setSavedPhoneNumberDirectory:(PhoneNumberDirectoryFilter*)phoneNumberDirectoryFilter {
-    [self storeBloomfilter:nil];
-    [self setValueForKey:PHONE_DIRECTORY_BLOOM_FILTER_HASH_COUNT_KEY toValue:nil];
-    [self setValueForKey:PHONE_DIRECTORY_EXPIRATION toValue:nil];
-    if (phoneNumberDirectoryFilter == nil) return;
-    
-    NSData* data = [[phoneNumberDirectoryFilter bloomFilter] data];
-    NSNumber* hashCount = @([[phoneNumberDirectoryFilter bloomFilter] hashCount]);
-    NSDate* expiry = phoneNumberDirectoryFilter.getExpirationDate;
-    [self storeBloomfilter:data];
-    [self setValueForKey:PHONE_DIRECTORY_BLOOM_FILTER_HASH_COUNT_KEY toValue:hashCount];
-    [self setValueForKey:PHONE_DIRECTORY_EXPIRATION toValue:expiry];
-    [self sendDirectoryUpdateNotification];
-}
 
 -(void) sendDirectoryUpdateNotification{
     [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_DIRECTORY_UPDATE object:nil];

@@ -64,8 +64,8 @@ static unsigned char DH3K_PRIME[]={
     return [Environment environmentWithLogging:logging
                                  andErrorNoter:errorNoter
                                  andServerPort:31337
-                       andMasterServerHostName:@"master.whispersystems.org"
-                           andDefaultRelayName:@"relay"
+                       andMasterServerHostName:@"redphone-master-staging.whispersystems.org"
+                           andDefaultRelayName:@"redphone-master-staging"
                   andRelayServerHostNameSuffix:@"whispersystems.org"
                                 andCertificate:[Certificate certificateFromResourcePath:@"redphone" ofType:@"cer"]
            andCurrentRegionCodeForPhoneNumbers:defaultRegion

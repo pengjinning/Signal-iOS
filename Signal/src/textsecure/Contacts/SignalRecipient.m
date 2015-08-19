@@ -7,44 +7,53 @@
 //
 
 #import "TSStorageManager+IdentityKeyStore.h"
-#import "TSRecipient.h"
+#import "SignalRecipient.h"
 
-@implementation TSRecipient
+@implementation SignalRecipient
 
 + (NSString*)collection{
-    return @"TSRecipient";
+    return @"SignalRecipient";
 }
 
-- (instancetype)initWithTextSecureIdentifier:(NSString*)textSecureIdentifier relay:(NSString *)relay{
+- (instancetype)initWithTextSecureIdentifier:(NSString*)textSecureIdentifier
+                                       relay:(NSString *)relay
+                                       voice:(BOOL)supportsVoice
+{
     self = [super initWithUniqueId:textSecureIdentifier];
     
     if (self) {
         _devices     = [NSMutableOrderedSet orderedSetWithObject:[NSNumber numberWithInt:1]];
         _relay       = relay;
+        _voice       = supportsVoice;
     }
     
     return self;
 }
 
-+ (instancetype)recipientWithTextSecureIdentifier:(NSString*)textSecureIdentifier withTransaction:(YapDatabaseReadTransaction*)transaction{
++ (instancetype)recipientWithTextSecureIdentifier:(NSString*)textSecureIdentifier withTransaction:(YapDatabaseReadTransaction*)transaction
+{
     return [self fetchObjectWithUniqueID:textSecureIdentifier transaction:transaction];
 }
 
-- (NSMutableOrderedSet*)devices{
+- (NSMutableOrderedSet*)devices
+{
     return [_devices copy];
 }
 
-- (void)addDevices:(NSSet *)set{
+- (void)addDevices:(NSSet *)set
+{
     [self checkDevices];
     [_devices unionSet:set];
 }
 
-- (void)removeDevices:(NSSet *)set{
+- (void)removeDevices:(NSSet *)set
+{
     [self checkDevices];
     [_devices minusSet:set];
 }
 
-- (void)checkDevices {
+- (void)checkDevices
+{
     if (_devices == nil || ![_devices isKindOfClass:[NSMutableOrderedSet class]]) {
         _devices = [NSMutableOrderedSet orderedSetWithObject:[NSNumber numberWithInt:1]];
     }

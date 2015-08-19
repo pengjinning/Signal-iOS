@@ -1,7 +1,6 @@
 #import "ContactsManager.h"
 #import "Environment.h"
 #import "NotificationManifest.h"
-#import "PhoneNumberDirectoryFilter.h"
 #import "PhoneNumberDirectoryFilterManager.h"
 #import "Util.h"
 
@@ -390,7 +389,7 @@ void onAddressBookChanged(ABAddressBookRef notifyAddressBook, CFDictionaryRef in
 
 -(NSArray*) getSignalUsersFromContactsArray:(NSArray*)contacts {
 	return [[contacts filter:^int(Contact* contact) {
-        return [self isContactRegisteredWithRedPhone:contact] || contact.isTextSecureContact;
+        return contact.isRedPhoneContact || contact.isTextSecureContact;
     }]sortedArrayUsingComparator:[[self class] contactComparator]];
 }
 
@@ -425,20 +424,6 @@ void onAddressBookChanged(ABAddressBookRef notifyAddressBook, CFDictionaryRef in
 	
 	[newSet minusSet:oldSet];
 	return newSet.allObjects;
-}
-
-- (BOOL)isContactRegisteredWithRedPhone:(Contact*)contact {
-	for(PhoneNumber *phoneNumber in contact.parsedPhoneNumbers){
-		if ( [self isPhoneNumberRegisteredWithRedPhone:phoneNumber]) {
-			return YES;
-		}
-	}
-	return NO;
-}
-
-- (BOOL)isPhoneNumberRegisteredWithRedPhone:(PhoneNumber*)phoneNumber {
-	PhoneNumberDirectoryFilter* directory = Environment.getCurrent.phoneDirectoryManager.getCurrentFilter;
-	return phoneNumber != nil && [directory containsPhoneNumber:phoneNumber];
 }
 
 - (NSString*)nameStringForPhoneIdentifier:(NSString*)identifier{

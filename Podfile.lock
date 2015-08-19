@@ -63,16 +63,16 @@ PODS:
     - SQLCipher/fts
 
 DEPENDENCIES:
-  - AFNetworking (~> 2.5.3)
+  - AFNetworking (~> 2.5.4)
   - APDropDownNavToolbar (from `https://github.com/corbett/APDropDownNavToolbar.git`,
     branch `master`)
   - AxolotlKit (~> 0.7)
   - DJWActionSheet
-  - FFCircularProgressView (>= 0.1)
+  - FFCircularProgressView (~> 0.5)
   - JSQMessagesViewController (from `https://github.com/WhisperSystems/JSQMessagesViewController`,
     commit `e5582fef8a6b3e35f8070361ef37237222da712b`)
-  - libPhoneNumber-iOS (~> 0.8.5)
-  - Mantle (~> 2.0.2)
+  - libPhoneNumber-iOS (~> 0.8.7)
+  - Mantle (~> 2.0.4)
   - OpenSSL (~> 1.0.204)
   - PastelogKit (~> 1.3)
   - SCWaveformView (~> 1.0)

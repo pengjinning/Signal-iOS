@@ -60,7 +60,7 @@ dispatch_queue_t sendingQueue() {
                 recipients = [groupThread recipientsWithTransaction:transaction];
             }];
             
-            for(TSRecipient *rec in recipients){
+            for(SignalRecipient *rec in recipients){
                 // we don't need to send the message to ourselves, but otherwise we send
                 if( ![[rec uniqueId] isEqualToString:[SignalKeyingStorage.localNumber toE164]]){
                     [self sendMessage:message
@@ -77,7 +77,7 @@ dispatch_queue_t sendingQueue() {
             [self saveMessage:message withState:TSOutgoingMessageStateAttemptingOut];
             
              if(![contactThread.contactIdentifier isEqualToString:[SignalKeyingStorage.localNumber toE164]]) {
-                 __block TSRecipient     *recipient;
+                 __block SignalRecipient     *recipient;
                  [self.dbConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
                      recipient = [contactThread recipientWithTransaction:transaction];
                  }];
@@ -98,7 +98,7 @@ dispatch_queue_t sendingQueue() {
 }
 
 - (void)sendMessage:(TSOutgoingMessage*)message
-        toRecipient:(TSRecipient*)recipient
+        toRecipient:(SignalRecipient*)recipient
            inThread:(TSThread*)thread
         withAttemps:(int)remainingAttempts{
     
@@ -179,7 +179,7 @@ dispatch_queue_t sendingQueue() {
     }
 }
 
-- (void)handleMismatchedDevices:(NSDictionary*)dictionary recipient:(TSRecipient*)recipient {
+- (void)handleMismatchedDevices:(NSDictionary*)dictionary recipient:(SignalRecipient*)recipient {
     NSArray *extraDevices   = [dictionary objectForKey:@"extraDevices"];
     NSArray *missingDevices = [dictionary objectForKey:@"missingDevices"];
     
@@ -204,7 +204,7 @@ dispatch_queue_t sendingQueue() {
     [self saveMessage:message withState:TSOutgoingMessageStateSent];
 }
 
-- (void)outgoingMessages:(TSOutgoingMessage*)message toRecipient:(TSRecipient*)recipient inThread:(TSThread*)thread completion:(messagesQueue)sendMessages{
+- (void)outgoingMessages:(TSOutgoingMessage*)message toRecipient:(SignalRecipient*)recipient inThread:(TSThread*)thread completion:(messagesQueue)sendMessages{
     NSMutableArray *messagesArray = [NSMutableArray arrayWithCapacity:recipient.devices.count];
     TSStorageManager *storage     = [TSStorageManager sharedManager];
     NSData *plainText             = [self plainTextForMessage:message inThread:thread];

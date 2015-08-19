@@ -513,7 +513,11 @@ typedef enum : NSUInteger {
 
 -(BOOL)isRedPhoneReachable
 {
-    return [[Environment getCurrent].contactsManager isPhoneNumberRegisteredWithRedPhone:[self phoneNumberForThread]];
+    __block SignalRecipient *recipient;
+    [self.editingDatabaseConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
+        recipient = [SignalRecipient recipientWithTextSecureIdentifier:[self phoneNumberForThread].toE164 withTransaction:transaction];
+    }];
+    return recipient.voice;
 }
 
 
@@ -522,9 +526,9 @@ typedef enum : NSUInteger {
         return YES;
     }
     else {
-        __block TSRecipient *recipient;
+        __block SignalRecipient *recipient;
         [self.editingDatabaseConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
-            recipient = [TSRecipient recipientWithTextSecureIdentifier:[self phoneNumberForThread].toE164 withTransaction:transaction];
+            recipient = [SignalRecipient recipientWithTextSecureIdentifier:[self phoneNumberForThread].toE164 withTransaction:transaction];
         }];
         return recipient?YES:NO;
     }

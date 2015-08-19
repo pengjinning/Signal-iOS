@@ -7,7 +7,7 @@
 //
 
 #import "TSGroupThread.h"
-#import "TSRecipient.h"
+#import "SignalRecipient.h"
 #import "NSData+Base64.h"
 
 @implementation TSGroupThread
@@ -62,9 +62,9 @@
     NSMutableArray *recipients = [[NSMutableArray alloc] init];
     
     for(NSString *recipientId in _groupModel.groupMemberIds) {
-        TSRecipient *recipient = [TSRecipient recipientWithTextSecureIdentifier:recipientId withTransaction:transaction];
+        SignalRecipient *recipient = [SignalRecipient recipientWithTextSecureIdentifier:recipientId withTransaction:transaction];
         if (!recipient){
-            recipient = [[TSRecipient alloc] initWithTextSecureIdentifier:recipientId relay:nil];
+            recipient = [[SignalRecipient alloc] initWithTextSecureIdentifier:recipientId relay:nil voice:NO];
         }
         [recipients addObject:recipient];
     }

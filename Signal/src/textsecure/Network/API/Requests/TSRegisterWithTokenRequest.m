@@ -23,7 +23,7 @@
     
     [self.parameters addEntriesFromDictionary:@{@"signalingKey": signalingKey,
                                                 @"AuthKey": authKey,
-                                                @"supportsSMS": @"0",
+                                                @"voice":@YES,
                                                 @"registrationId": [NSString stringWithFormat:@"%i",[TSAccountManager getOrGenerateRegistrationId]]}];
     
     [self setHTTPMethod:@"PUT"];

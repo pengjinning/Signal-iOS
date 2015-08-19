@@ -9,7 +9,7 @@
 #import "ThreadManager.h"
 #import "TSContactsIntersectionRequest.h"
 #import "TSStorageManager.h"
-#import "TSRecipient.h"
+#import "SignalRecipient.h"
 #import "Util.h"
 
 #define MINUTE (60.0)
@@ -24,7 +24,6 @@
 
 - (id)init {
     if (self = [super init]) {
-        phoneNumberDirectoryFilter = PhoneNumberDirectoryFilter.phoneNumberDirectoryFilterDefault;
         _isRefreshing              = NO;
     }
     return self;
@@ -32,25 +31,14 @@
 - (void)startUntilCancelled:(TOCCancelToken*)cancelToken {
     lifetimeToken = cancelToken;
     
-    phoneNumberDirectoryFilter = [Environment.preferences tryGetSavedPhoneNumberDirectory];
-    if (phoneNumberDirectoryFilter == nil) {
-        phoneNumberDirectoryFilter = PhoneNumberDirectoryFilter.phoneNumberDirectoryFilterDefault;
-    }
-    
-    [self scheduleUpdate];
+    //[self scheduleUpdate];
 }
 
-- (PhoneNumberDirectoryFilter*)getCurrentFilter {
-    @synchronized(self) {
-        return phoneNumberDirectoryFilter;
-    }
-}
+
 - (void)forceUpdate {
     [self scheduleUpdateAt:NSDate.date];
 }
-- (void)scheduleUpdate {
-    return [self scheduleUpdateAt:self.getCurrentFilter.getExpirationDate];
-}
+
 - (void)scheduleUpdateAt:(NSDate*)date {
     void(^doUpdate)(void) = ^{
         if (Environment.isRedPhoneRegistered) {
@@ -71,30 +59,8 @@
 
 - (void) updateRedPhone {
     _isRefreshing = YES;
-    [[RPServerRequestsManager sharedInstance] performRequest:[RPAPICall fetchBloomFilter] success:^(NSURLSessionDataTask *task, id responseObject) {
-        PhoneNumberDirectoryFilter *directory = [PhoneNumberDirectoryFilter phoneNumberDirectoryFilterFromURLResponse:(NSHTTPURLResponse*)task.response body:responseObject];
-        
-        @synchronized(self) {
-            phoneNumberDirectoryFilter = directory;
-        }
-        
-        [Environment.preferences setSavedPhoneNumberDirectory:directory];
-        [self updateTextSecureWithRedPhoneSucces:YES];
-    } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        DDLogError(@"Error to fetch contact interesection: %@", error.debugDescription);
-        NSString* desc = [NSString stringWithFormat:NSLocalizedString(@"FAILED_RETRYING_DIRECTORY_DOWNLOAD", @""),
-                          DIRECTORY_UPDATE_RETRY_PERIOD/HOUR];
-        Environment.errorNoter(desc, error, false);
-        BloomFilter* filter = [phoneNumberDirectoryFilter bloomFilter];
-        NSDate* retryDate = [NSDate dateWithTimeInterval:DIRECTORY_UPDATE_RETRY_PERIOD
-                                               sinceDate:[NSDate date]];
-        @synchronized(self) {
-            phoneNumberDirectoryFilter = [PhoneNumberDirectoryFilter phoneNumberDirectoryFilterWithBloomFilter:filter
-                                                                                             andExpirationDate:retryDate];
-        }
-        
-        [self updateTextSecureWithRedPhoneSucces:NO];
-    }];
+   
+    [self updateTextSecureWithRedPhoneSucces:YES];
 }
 
 - (void)updateTextSecureWithRedPhoneSucces:(BOOL)redPhoneSuccess {
@@ -117,6 +83,7 @@
     [[TSNetworkManager sharedManager] queueAuthenticatedRequest:request success:^(NSURLSessionDataTask *tsTask, id responseDict) {
         NSMutableArray      *tsIdentifiers      = [NSMutableArray array];
         NSMutableDictionary *relayForIdentifier = [NSMutableDictionary dictionary];
+        NSMutableDictionary *supportsVoiceDict  = [NSMutableDictionary dictionary];
         NSArray *contactsArray                  = [(NSDictionary*)responseDict objectForKey:@"contacts"];
         
         if (contactsArray) {
@@ -130,17 +97,31 @@
                     if (relay) {
                         [relayForIdentifier setObject:relay forKey:[phoneNumbersByHashes objectForKey:hash]];
                     }
+                    
+                    id supportsVoice = [dict objectForKey:@"voice"];
+                    if ([supportsVoice isEqualToNumber:@YES]) {
+                        [supportsVoiceDict setObject:@YES forKey:[phoneNumbersByHashes objectForKey:hash]];
+                    }
+                    
                 }
             }
         }
         
+        NSLog(@"%@", supportsVoiceDict);
+        
         [[TSStorageManager sharedManager].dbConnection readWriteWithBlock:^(YapDatabaseReadWriteTransaction *transaction) {
             for (NSString *identifier in tsIdentifiers) {
-                TSRecipient *recipient = [TSRecipient recipientWithTextSecureIdentifier:identifier withTransaction:transaction];
+                SignalRecipient *recipient = [SignalRecipient recipientWithTextSecureIdentifier:identifier withTransaction:transaction];
                 if (!recipient) {
-                    NSString *relay = [relayForIdentifier objectForKey:recipient];
-                    recipient = [[TSRecipient alloc] initWithTextSecureIdentifier:identifier relay:relay];
+                    recipient = [[SignalRecipient alloc] initWithTextSecureIdentifier:identifier relay:nil voice:NO];
                 }
+                
+                NSString *relay    = [relayForIdentifier objectForKey:recipient.uniqueId];
+                NSNumber *voiceNum = [supportsVoiceDict  objectForKey:recipient.uniqueId];
+                
+                recipient.relay = relay;
+                recipient.voice = voiceNum.boolValue?YES:NO;
+                
                 [recipient saveWithTransaction:transaction];
             }
         }];
@@ -148,7 +129,7 @@
         _isRefreshing = NO;
         [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_DIRECTORY_WAS_UPDATED object:nil];
         
-        [self scheduleUpdate];
+        //[self scheduleUpdate];
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         _isRefreshing = NO;
         [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_DIRECTORY_FAILED object:nil];

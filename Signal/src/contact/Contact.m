@@ -2,7 +2,7 @@
 #import "ContactsManager.h"
 #import "TSStorageManager.h"
 #import "Environment.h"
-#import "TSRecipient.h"
+#import "SignalRecipient.h"
 
 static NSString *const DEFAULTS_KEY_CONTACT = @"DefaultsKeyContact";
 static NSString *const DEFAULTS_KEY_PHONE_NUMBER = @"DefaultsKeyPhoneNumber";
@@ -89,7 +89,7 @@ static NSString *const DEFAULTS_KEY_DATE = @"DefaultsKeyDate";
     __block BOOL isRecipient = NO;
     [[TSStorageManager sharedManager].dbConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
         for (PhoneNumber *number in self.parsedPhoneNumbers) {
-            if ([TSRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction]) {
+            if ([SignalRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction]) {
                 isRecipient = YES;
                 break;
             }
@@ -103,7 +103,7 @@ static NSString *const DEFAULTS_KEY_DATE = @"DefaultsKeyDate";
     
     [[TSStorageManager sharedManager].dbConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
         for (PhoneNumber *number in self.parsedPhoneNumbers) {
-            if ([TSRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction]) {
+            if ([SignalRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction]) {
                 [identifiers addObject:number.toE164];
             }
         }
@@ -112,20 +112,30 @@ static NSString *const DEFAULTS_KEY_DATE = @"DefaultsKeyDate";
 }
 
 - (BOOL)isRedPhoneContact{
-    ContactsManager *contactManager = [Environment getCurrent].contactsManager;
-    return [contactManager isContactRegisteredWithRedPhone:self];
+    __block BOOL isRecipient = NO;
+    [[TSStorageManager sharedManager].dbConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
+        for (PhoneNumber *number in self.parsedPhoneNumbers) {
+            SignalRecipient *recipient = [SignalRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction];
+            if (recipient.voice) {
+                isRecipient = YES;
+                break;
+            }
+        }
+    }];
+    return isRecipient;
 }
 
 - (NSArray *)redPhoneIdentifiers{
     __block NSMutableArray *identifiers = [NSMutableArray array];
     
-    ContactsManager *contactManager = [Environment getCurrent].contactsManager;
-    for (PhoneNumber *number in self.parsedPhoneNumbers) {
-        if ([contactManager isPhoneNumberRegisteredWithRedPhone:number]) {
-            [identifiers addObject:number];
+    [[TSStorageManager sharedManager].dbConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
+        for (PhoneNumber *number in self.parsedPhoneNumbers) {
+            SignalRecipient *recipient = [SignalRecipient recipientWithTextSecureIdentifier:number.toE164 withTransaction:transaction];
+            if (recipient.voice) {
+                [identifiers addObject:number];
+            }
         }
-    }
-    
+    }];
     return identifiers;
 }
 

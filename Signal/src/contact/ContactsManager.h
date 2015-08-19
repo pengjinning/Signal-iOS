@@ -29,8 +29,6 @@ typedef void(^ABReloadRequestCompletionBlock)(NSArray *contacts);
 -(ObservableValue *) getObservableContacts;
 -(ObservableValue *) getObservableRedPhoneUsers;
 
-- (BOOL)isPhoneNumberRegisteredWithRedPhone:(PhoneNumber*)phoneNumber;
-
 -(NSArray*) getContactsFromAddressBook:(ABAddressBookRef)addressBook;
 -(Contact*) latestContactWithRecordId:(ABRecordID)recordId;
 -(Contact*) latestContactForPhoneNumber:(PhoneNumber *)phoneNumber;
@@ -44,8 +42,6 @@ typedef void(^ABReloadRequestCompletionBlock)(NSArray *contacts);
 - (NSArray*)allContacts;
 - (NSArray*)signalContacts;
 - (NSArray*)textSecureContacts;
-
-- (BOOL)isContactRegisteredWithRedPhone:(Contact*)contact;
 
 -(void)doAfterEnvironmentInitSetup;
 

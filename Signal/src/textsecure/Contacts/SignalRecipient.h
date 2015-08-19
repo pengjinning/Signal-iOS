@@ -8,9 +8,11 @@
 
 #import "TSYapDatabaseObject.h"
 
-@interface TSRecipient : TSYapDatabaseObject
+@interface SignalRecipient : TSYapDatabaseObject
 
-- (instancetype)initWithTextSecureIdentifier:(NSString*)textSecureIdentifier relay:(NSString*)relay;
+- (instancetype)initWithTextSecureIdentifier:(NSString*)textSecureIdentifier
+                                       relay:(NSString *)relay
+                                       voice:(BOOL)supportsVoice;
 
 + (instancetype)recipientWithTextSecureIdentifier:(NSString*)textSecureIdentifier withTransaction:(YapDatabaseReadTransaction*)transaction;
 
@@ -18,7 +20,8 @@
 
 - (void)removeDevices:(NSSet *)set;
 
-@property (nonatomic, readonly) NSString *relay;
+@property (nonatomic)           NSString *relay;
 @property (nonatomic, retain)   NSMutableOrderedSet *devices;
+@property                       BOOL voice;
 
 @end

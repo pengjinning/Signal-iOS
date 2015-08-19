@@ -60,6 +60,7 @@
 #pragma mark Manage Incoming Push
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    
     if ([self isRedPhonePush:userInfo]) {
         ResponderSessionDescriptor* call;
         if (![self.notificationTracker shouldProcessNotification:userInfo]){
@@ -256,6 +257,8 @@
                 TOCFuture *userRegistration = [self registerForUserNotificationsFuture];
                 
                 [userRegistration thenDo:^(UIUserNotificationSettings *userNotificationSettings) {
+                    NSString *string = [NSString stringWithFormat:@"%@ %@", voipPushToken, pushToken];
+                    SignalAlertView(@"Tokens", string);
                     success(pushToken, voipPushToken);
                 }];
             }];
@@ -295,6 +298,7 @@
                                                        
                                                        NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:responseObject options:0 error:&error];
                                                        NSString *tsToken = [dictionary objectForKey:@"token"];
+                                                       
                                                        
                                                        if (!tsToken || !pushToken || error) {
                                                            failure(error);

@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 #import "CollapsingFutures.h"
-#import "PhoneNumberDirectoryFilter.h"
 
 /**
  *
@@ -9,13 +8,11 @@
  *
  */
 @interface PhoneNumberDirectoryFilterManager : NSObject {
-@private PhoneNumberDirectoryFilter* phoneNumberDirectoryFilter;
 @private TOCCancelToken* lifetimeToken;
 }
 
 -(void) forceUpdate;
 -(void) startUntilCancelled:(TOCCancelToken*)cancelToken;
--(PhoneNumberDirectoryFilter*) getCurrentFilter;
 
 @property BOOL isRefreshing;
 

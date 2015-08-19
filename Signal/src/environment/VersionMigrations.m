@@ -33,6 +33,7 @@
 #pragma mark Utility methods
 
 + (void)performUpdateCheck{
+#warning delete TSRecipients models
     NSString *previousVersion     = Environment.preferences.lastRanVersion;
     NSString *currentVersion      = [Environment.preferences setAndGetCurrentVersion];
     BOOL     isCurrentlyMigrating = [VersionMigrations isMigratingTo2Dot0];
@@ -46,10 +47,6 @@
     
     if(([self isVersion:previousVersion atLeast:@"1.0.2" andLessThan:@"2.0"]) || isCurrentlyMigrating) {
         [VersionMigrations migrateFrom1Dot0Dot2ToVersion2Dot0];
-    }
-    
-    if(([self isVersion:previousVersion atLeast:@"2.0.0" andLessThan:@"2.0.18"])) {
-        [VersionMigrations migrateBloomFilter];
     }
     
     if ([self isVersion:previousVersion atLeast:@"2.0.0" andLessThan:@"2.0.21"] || needsToRegisterPush) {
@@ -97,14 +94,6 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-#pragma mark 2.0.1
-
-+ (void)migrateBloomFilter {
-    // The bloom filter had to be moved to the cache folder after rejection of the 2.0.1
-    NSString *oldBloomKey = @"Directory Bloom Data";
-    [[Environment preferences] setValueForKey:oldBloomKey toValue:nil];
-    return;
-}
 
 #pragma mark 2.0
 
