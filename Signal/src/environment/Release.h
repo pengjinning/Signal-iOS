@@ -1,18 +1,18 @@
+//
+//  Copyright (c) 2017 Open Whisper Systems. All rights reserved.
+//
+
 #import <Foundation/Foundation.h>
 #import "Environment.h"
-#import "DH3KKeyAgreementProtocol.h"
-#import "EC25KeyAgreementProtocol.h"
 
 @interface Release : NSObject
 
 /// Connects to actual production infrastructure
-+(Environment*) releaseEnvironmentWithLogging:(id<Logging>)logging;
++ (Environment *)releaseEnvironment;
 
-+(Environment*) stagingEnvironmentWithLogging:(id<Logging>)logging;
++ (Environment *)stagingEnvironment;
 
 /// Fake environment with no logging
-+(Environment*) unitTestEnvironment:(NSArray*)testingAndLegacyOptions;
-
-+(DH3KKeyAgreementProtocol*) supportedDH3KKeyAgreementProtocol;
++ (Environment *)unitTestEnvironment:(NSArray *)testingAndLegacyOptions;
 
 @end

@@ -1,10 +1,13 @@
+//
+//  Copyright (c) 2017 Open Whisper Systems. All rights reserved.
+//
+
 #import <Foundation/Foundation.h>
 
+#import "MIMETypeUtil.h"
 #import "UIColor+OWS.h"
 #import "UIFont+OWS.h"
-#import "UIImage+normalizeImage.h"
-#import "UIImage+contentTypes.h"
-#import "MIMETypeUtil.h"
+#import "UIImage+OWS.h"
 
 typedef void (^completionBlock)(void);
 
@@ -16,8 +19,11 @@ typedef void (^completionBlock)(void);
 
 @interface UIUtil : NSObject
 
-+ (void)applyRoundedBorderToImageView:(UIImageView *__strong*)imageView;
-+ (void)removeRoundedBorderToImageView:(UIImageView *__strong*)imageView;
++ (void)applyRoundedBorderToImageView:(UIImageView *)imageView;
++ (void)removeRoundedBorderToImageView:(UIImageView *__strong *)imageView;
 
 + (completionBlock)modalCompletionBlock;
++ (void)applyDefaultSystemAppearence;
++ (void)applySignalAppearence;
+
 @end

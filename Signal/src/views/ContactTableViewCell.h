@@ -1,5 +1,9 @@
+//
+//  Copyright (c) 2017 Open Whisper Systems. All rights reserved.
+//
+
 #import <UIKit/UIKit.h>
-#import "ContactsManager.h"
+#import "OWSContactsManager.h"
 
 /**
  *
@@ -7,13 +11,31 @@
  *
  */
 
+NS_ASSUME_NONNULL_BEGIN
+
+extern NSString *const kContactsTable_CellReuseIdentifier;
+
+@class OWSContactsManager;
+@class SignalAccount;
+@class TSThread;
+
 @interface ContactTableViewCell : UITableViewCell
 
-@property (nonatomic, strong) IBOutlet UILabel *nameLabel;
-@property (nonatomic, strong) IBOutlet UIButton *callButton ;
+@property (nonatomic, nullable) NSString *accessoryMessage;
+@property (nonatomic, readonly) UILabel *subtitle;
 
-@property BOOL shouldShowContactButtons;
++ (nullable NSString *)reuseIdentifier;
 
-- (void)configureWithContact:(Contact *)contact;
--(IBAction)callContact:(id)sender;
++ (CGFloat)rowHeight;
+
+- (void)configureWithSignalAccount:(SignalAccount *)signalAccount contactsManager:(OWSContactsManager *)contactsManager;
+
+- (void)configureWithRecipientId:(NSString *)recipientId contactsManager:(OWSContactsManager *)contactsManager;
+
+- (void)configureWithThread:(TSThread *)thread contactsManager:(OWSContactsManager *)contactsManager;
+
+- (NSAttributedString *)verifiedSubtitle;
+
 @end
+
+NS_ASSUME_NONNULL_END

@@ -1,7 +1,9 @@
-#import "DateUtil.h"
+//
+//  Copyright (c) 2017 Open Whisper Systems. All rights reserved.
+//
 
-#define ONE_DAY_TIME_INTERVAL (double)60*60*24
-#define ONE_WEEK_TIME_INTERVAL (double)60*60*24*7
+#import "DateUtil.h"
+#import <SignalServiceKit/NSDate+OWS.h>
 
 static NSString *const DATE_FORMAT_WEEKDAY = @"EEEE";
 
@@ -31,23 +33,23 @@ static NSString *const DATE_FORMAT_WEEKDAY = @"EEEE";
 }
 
 + (BOOL)dateIsOlderThanOneDay:(NSDate *)date {
-    return [[NSDate date] timeIntervalSinceDate:date] > ONE_DAY_TIME_INTERVAL;
+    return [[NSDate date] timeIntervalSinceDate:date] > kDayInterval;
 }
 
 + (BOOL)dateIsOlderThanOneWeek:(NSDate *)date {
-    return [[NSDate date] timeIntervalSinceDate:date] > ONE_WEEK_TIME_INTERVAL;
+    return [[NSDate date] timeIntervalSinceDate:date] > kWeekInterval;
 }
 
-+ (BOOL)date:(NSDate *)date isEqualToDateIgnoringTime:(NSDate *)anotherDate{
-    static const unsigned componentFlags = (NSCalendarUnitYear| NSCalendarUnitMonth | NSCalendarUnitDay);
++ (BOOL)date:(NSDate *)date isEqualToDateIgnoringTime:(NSDate *)anotherDate {
+    static const unsigned componentFlags = (NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay);
     NSDateComponents *components1 = [[NSCalendar autoupdatingCurrentCalendar] components:componentFlags fromDate:date];
-    NSDateComponents *components2 = [[NSCalendar autoupdatingCurrentCalendar] components:componentFlags fromDate:anotherDate];
-    return ((components1.year == components2.year) &&
-            (components1.month == components2.month) &&
+    NSDateComponents *components2 =
+        [[NSCalendar autoupdatingCurrentCalendar] components:componentFlags fromDate:anotherDate];
+    return ((components1.year == components2.year) && (components1.month == components2.month) &&
             (components1.day == components2.day));
 }
 
-+ (BOOL)dateIsToday:(NSDate *)date{
++ (BOOL)dateIsToday:(NSDate *)date {
     return [self date:[NSDate date] isEqualToDateIgnoringTime:date];
 }
 
